@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5267274562285421509
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2223094167357388569}
+  - component: {fileID: 7133400865891741370}
+  m_Layer: 0
+  m_Name: CityGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2223094167357388569
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5267274562285421509}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.94951, y: 0.64297, z: -7.56198}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7133400865891741370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5267274562285421509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79027732408c4295a961c82f5dcea2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CityGenerator
+  width: 20
+  height: 20
+  tileSize: 1
+  roadPrefab: {fileID: 100000, guid: 4f32dfddb033d3e40b5841bc53cc1689, type: 3}
+  cornerRoadPrefab: {fileID: 100000, guid: 3a7e1c0a00828fd4196c8cd24886d2ed, type: 3}
+  tJunctionRoadPrefab: {fileID: 100000, guid: cbc86bb57f673ba45a8426789eb0fac0, type: 3}
+  intersectionRoadPrefab: {fileID: 100000, guid: 47ef019eb3bddab469e56e5a31eebf68, type: 3}
+  buildingPrefab: {fileID: 0}
+  emptyGroundPrefab: {fileID: 0}
+  trashCanPrefab: {fileID: 0}
+  useMapFile: 1
+  mapTextAsset: {fileID: 0}
+  mapFilePath: Assets/Scripts/100x100.map
+  syncGridSizeToMap: 1
+  mapFirstLineIsTop: 1
+  populateBuildingsOnMapEmptyCells: 0
+  useIrregularRoadNetwork: 1
+  roadIntervalX: 5
+  roadIntervalY: 5
+  minBlockSize: 4
+  maxBlockSize: 10
+  useVariableBlockSize: 1
+  mainVerticalRoadCount: 3
+  mainHorizontalRoadCount: 3
+  partialRoadSegmentCount: 8
+  minRoadSpacing: 4
+  minPartialRoadLength: 4
+  maxPartialRoadLength: 15
+  forceBorderRoads: 1
+  minBuildingWidth: 1
+  maxBuildingWidth: 4
+  minBuildingHeight: 1
+  maxBuildingHeight: 3
+  buildingFillChance: 0.75
+  emptySpaceChance: 0.25
+  maxPlacementAttemptsPerBlock: 50
+  spawnBuildingsAsFootprints: 1
+  scaleBuildingFootprintsToArea: 1
+  fitTilePrefabsToTileSize: 1
+  trashCanProbability: 0.15
+  trashCanDensityMultiplier: 0.33
+  generateOnStart: 1
+  logGenerationDiagnostics: 1
+  enableRoadDebugLog: 0
+  roadGizmoColor: {r: 0.15, g: 0.15, b: 0.15, a: 0.35}
+  buildingGizmoColor: {r: 0.6, g: 0.25, b: 0.15, a: 0.35}
+  emptyGizmoColor: {r: 1, g: 1, b: 1, a: 0.08}
+  trashCanGizmoColor: {r: 0, g: 0.8, b: 0.25, a: 0.75}
