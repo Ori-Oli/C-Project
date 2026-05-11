@@ -1,0 +1,74 @@
+# ========== Unity Generated ==========
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+UserSettings/
+
+# ========== Asset Meta ==========
+!/[Aa]ssets/**/*.meta
+!/[Pp]ackages/**/*.meta
+
+# ========== Visual Studio / Rider ==========
+.vs/
+.idea/
+.gradle/
+ExportedObj/
+.consulo/
+
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# ========== Unity Cache ==========
+/Assets/AssetStoreTools*
+
+# ========== Auto Generated ==========
+sysinfo.txt
+
+# ========== Addressables ==========
+/ServerData
+
+# ========== Crash Reports ==========
+crashlytics-build.properties
+
+# ========== Mac ==========
+.DS_Store
+
+# ========== Windows ==========
+Thumbs.db
+
+# ========== JetBrains Rider ==========
+.idea/
+
+# ========== VSCode ==========
+.vscode/
+
+# ========== Package Cache ==========
+/Library/PackageCache/
+/Library/ScriptAssemblies/
+
+# ========== Android ==========
+*.apk
+*.aab
+*.keystore
+
+# ========== iOS ==========
+DerivedData/
+
+# ========== WebGL ==========
+*.webgl
