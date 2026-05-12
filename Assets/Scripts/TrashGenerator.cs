@@ -8,6 +8,10 @@ public class TrashGenerator : MonoBehaviour
     
     [Header("Trash 프리팹")]
     public GameObject trashPrefab;
+
+    [Header("쓰레기통 연동")]
+    public TrashCanFillSensor trashCanFillSensor;
+    [Range(0f, 1f)] public float stopSpawnFillRatio = 0.8f;
     
     [Header("생성 설정")]
     public float spawnInterval = 0.5f; // 생성 간격 (초)
@@ -29,6 +33,11 @@ public class TrashGenerator : MonoBehaviour
 
     void Start()
     {
+        if (trashCanFillSensor == null)
+        {
+            trashCanFillSensor = FindAnyObjectByType<TrashCanFillSensor>();
+        }
+
         // 첫 생성 시간 설정
         nextSpawnTime = Random.Range(0f, spawnInterval);
     }
@@ -37,7 +46,7 @@ public class TrashGenerator : MonoBehaviour
     {
         spawnTimer += Time.deltaTime;
         
-        if (spawnTimer >= nextSpawnTime)
+        if (spawnTimer >= nextSpawnTime && CanSpawnTrash())
         {
             SpawnTrash();
             
@@ -45,6 +54,36 @@ public class TrashGenerator : MonoBehaviour
             nextSpawnTime = spawnInterval + Random.Range(-spawnRandomRange, spawnRandomRange);
             spawnTimer = 0f;
         }
+    }
+
+    bool CanSpawnTrash()
+    {
+        if (trashCanFillSensor == null)
+        {
+            return true;
+        }
+
+        return CanSpawnOnLeftSide() || CanSpawnOnRightSide();
+    }
+
+    bool CanSpawnOnLeftSide()
+    {
+        if (trashCanFillSensor == null)
+        {
+            return true;
+        }
+
+        return trashCanFillSensor.LeftFillRatio < stopSpawnFillRatio;
+    }
+
+    bool CanSpawnOnRightSide()
+    {
+        if (trashCanFillSensor == null)
+        {
+            return true;
+        }
+
+        return trashCanFillSensor.RightFillRatio < stopSpawnFillRatio;
     }
     
     void SpawnTrash()
@@ -55,8 +94,8 @@ public class TrashGenerator : MonoBehaviour
             return;
         }
         
-        // 왼쪽 또는 오른쪽 랜덤 선택
-        Transform spawnPosition = Random.value > 0.5f ? trashGenerateL : trashGenerateR;
+        // 비어 있는 쪽 또는 덜 찬 쪽을 우선 선택
+        Transform spawnPosition = SelectSpawnPosition();
         
         if (spawnPosition == null)
         {
@@ -73,6 +112,23 @@ public class TrashGenerator : MonoBehaviour
         
         // Trash 생성
         GameObject trash = Instantiate(trashPrefab, offsetPosition, spawnPosition.rotation);
+
+        // 쓰레기통 센서가 감지할 수 있도록 마커를 보장합니다.
+        TrashItemMarker marker = trash.GetComponent<TrashItemMarker>();
+        if (marker == null)
+        {
+            marker = trash.AddComponent<TrashItemMarker>();
+        }
+
+        // Spawn side flag
+        if (trashGenerateL != null && spawnPosition == trashGenerateL)
+        {
+            marker.spawnSide = TrashItemMarker.SpawnSide.Left;
+        }
+        else if (trashGenerateR != null && spawnPosition == trashGenerateR)
+        {
+            marker.spawnSide = TrashItemMarker.SpawnSide.Right;
+        }
         
         // Rigidbody에 힘 추가해서 굴러다니게 함
         Rigidbody rb = trash.GetComponent<Rigidbody>();
@@ -85,5 +141,43 @@ public class TrashGenerator : MonoBehaviour
             );
             rb.AddForce(force, ForceMode.Impulse);
         }
+    }
+
+    Transform SelectSpawnPosition()
+    {
+        bool canSpawnLeft = trashGenerateL != null && CanSpawnOnLeftSide();
+        bool canSpawnRight = trashGenerateR != null && CanSpawnOnRightSide();
+
+        if (!canSpawnLeft && !canSpawnRight)
+        {
+            return null;
+        }
+
+        if (canSpawnLeft && !canSpawnRight)
+        {
+            return trashGenerateL;
+        }
+
+        if (!canSpawnLeft && canSpawnRight)
+        {
+            return trashGenerateR;
+        }
+
+        if (trashCanFillSensor == null)
+        {
+            return Random.value > 0.5f ? trashGenerateL : trashGenerateR;
+        }
+
+        if (trashCanFillSensor.LeftFillRatio < trashCanFillSensor.RightFillRatio)
+        {
+            return trashGenerateL;
+        }
+
+        if (trashCanFillSensor.RightFillRatio < trashCanFillSensor.LeftFillRatio)
+        {
+            return trashGenerateR;
+        }
+
+        return Random.value > 0.5f ? trashGenerateL : trashGenerateR;
     }
 }
