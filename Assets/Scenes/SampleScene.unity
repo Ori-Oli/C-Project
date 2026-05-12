@@ -119,6 +119,75 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &30701359
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 30701361}
+  - component: {fileID: 30701360}
+  m_Layer: 0
+  m_Name: Trash Collection Test Signal
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &30701360
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 30701359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8206480d654e440fb5233c3533d2b422, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrashCollectionTestSignal
+  cityGenerator: {fileID: 169847250}
+  dispatcher: {fileID: 2089470310}
+  createDispatcherIfMissing: 1
+  triggerOnStart: 1
+  startDelay: 2
+  triggerWithKey: 1
+  triggerKey: 102
+  keyboardTriggerKey: 20
+  showGuiButton: 1
+  targetMode: 0
+  trashCansPerTrigger: 1
+  fillRepeatedly: 0
+  repeatInterval: 5
+  logSignals: 1
+--- !u!4 &30701361
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 30701359}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 201.87904, y: 0, z: 329.80637}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &169847250 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7133400865891741370, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+  m_PrefabInstance: {fileID: 1892862690}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79027732408c4295a961c82f5dcea2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CityGenerator
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -432,6 +501,114 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1892862690
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2223094167357388569, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 152.4478
+      objectReference: {fileID: 0}
+    - target: {fileID: 2223094167357388569, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2223094167357388569, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 279.9761
+      objectReference: {fileID: 0}
+    - target: {fileID: 2223094167357388569, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2223094167357388569, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2223094167357388569, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2223094167357388569, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2223094167357388569, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2223094167357388569, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2223094167357388569, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5267274562285421509, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+      propertyPath: m_Name
+      value: CityGenerator
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+--- !u!1 &2089470309
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2089470311}
+  - component: {fileID: 2089470310}
+  m_Layer: 0
+  m_Name: TrashCollectionDispatcher
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2089470310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089470309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 485dc17aea164077ad64b1d8bbc55c05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrashCollectionDispatcher
+  cityGenerator: {fileID: 0}
+  trucks: []
+  maxTruckCount: 5
+  spawnPlaceholderTrucksIfNone: 1
+  placeholderTruckCount: 5
+  autoFindReferences: 1
+  logDispatchWarnings: 1
+--- !u!4 &2089470311
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089470309}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 172.18999, y: 0, z: 321.676}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -439,3 +616,6 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 410087041}
   - {fileID: 832575519}
+  - {fileID: 1892862690}
+  - {fileID: 2089470311}
+  - {fileID: 30701361}
