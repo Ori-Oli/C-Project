@@ -53,7 +53,7 @@ MonoBehaviour:
   intersectionRoadPrefab: {fileID: 100000, guid: 47ef019eb3bddab469e56e5a31eebf68, type: 3}
   buildingPrefab: {fileID: 0}
   emptyGroundPrefab: {fileID: 0}
-  trashCanPrefab: {fileID: 1718315326527200748, guid: 84bc83f338f77451e971b039c9c4d912, type: 3}
+  trashCanPrefab: {fileID: 6265023572636278062, guid: aab43fd86dd4043f4bfe0f4e06d81239, type: 3}
   useMapFile: 1
   mapTextAsset: {fileID: 0}
   mapFilePath: Assets/Scripts/100x100.map
