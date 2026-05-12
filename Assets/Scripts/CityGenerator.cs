@@ -136,6 +136,11 @@ public class CityGenerator : MonoBehaviour
     public bool logGenerationDiagnostics = true;
     public bool enableRoadDebugLog = false;
 
+    [Header("Collection Depot")]
+    public bool spawnDepotMarker = true;
+    public Vector3 depotMarkerScale = new Vector3(0.8f, 0.5f, 0.8f);
+    public Color depotMarkerColor = new Color(0.05f, 0.55f, 1f, 1f);
+
     [Header("Gizmo Colors")]
     public Color roadGizmoColor = new Color(0.15f, 0.15f, 0.15f, 0.35f);
     public Color buildingGizmoColor = new Color(0.6f, 0.25f, 0.15f, 0.35f);
@@ -143,8 +148,14 @@ public class CityGenerator : MonoBehaviour
     public Color trashCanGizmoColor = new Color(0f, 0.8f, 0.25f, 0.75f);
 
     public CityCell[,] Grid => grid;
+    public CityCell CollectionDepotCell => collectionDepotCell;
+    public Vector2Int CollectionDepotGridPosition => collectionDepotCell != null
+        ? new Vector2Int(collectionDepotCell.x, collectionDepotCell.y)
+        : new Vector2Int(-1, -1);
+    public event System.Action CityGenerated;
 
     private CityCell[,] grid;
+    private CityCell collectionDepotCell;
     private Transform generatedRoot;
     private readonly List<int> verticalRoadXs = new List<int>();
     private readonly List<int> horizontalRoadYs = new List<int>();
@@ -213,6 +224,7 @@ public class CityGenerator : MonoBehaviour
         PlaceTrashCans();
         LogGenerationDiagnostics();
         SpawnPrefabsFromGrid();
+        CityGenerated?.Invoke();
     }
 
     public void ClearCity()
@@ -223,6 +235,7 @@ public class CityGenerator : MonoBehaviour
         }
 
         grid = null;
+        collectionDepotCell = null;
         verticalRoadXs.Clear();
         horizontalRoadYs.Clear();
         buildingFootprints.Clear();
@@ -391,6 +404,13 @@ public class CityGenerator : MonoBehaviour
         if (value == '1')
         {
             SetRoadCell(x, y);
+            return;
+        }
+
+        if (value == 'A')
+        {
+            SetRoadCell(x, y);
+            collectionDepotCell = grid[x, y];
             return;
         }
 
@@ -894,6 +914,11 @@ public class CityGenerator : MonoBehaviour
                     continue;
                 }
 
+                if (cell == collectionDepotCell)
+                {
+                    continue;
+                }
+
                 if (Random.value <= actualTrashCanProbability)
                 {
                     cell.hasTrashCan = true;
@@ -921,6 +946,7 @@ public class CityGenerator : MonoBehaviour
 
                 SpawnTilePrefab(cell, worldPosition);
                 SpawnTrashCanPrefab(cell, worldPosition);
+                SpawnDepotMarker(cell, worldPosition);
             }
         }
     }
@@ -1211,9 +1237,43 @@ public class CityGenerator : MonoBehaviour
         Vector3 trashCanPosition = worldPosition + new Vector3(0f, 0.05f, 0f);
         GameObject spawnedTrashCan = Instantiate(trashCanPrefab, trashCanPosition, Quaternion.identity, generatedRoot);
         spawnedTrashCan.name = $"TrashCan_{cell.x}_{cell.y}";
+        cell.spawnedObject = spawnedTrashCan;
+
+        TrashCanStatus status = spawnedTrashCan.GetComponent<TrashCanStatus>();
+        if (status == null)
+        {
+            status = spawnedTrashCan.AddComponent<TrashCanStatus>();
+        }
+
+        status.Initialize(new Vector2Int(cell.x, cell.y));
     }
 
-    private Vector3 GridToWorldPosition(int x, int y)
+    private void SpawnDepotMarker(CityCell cell, Vector3 worldPosition)
+    {
+        if (!spawnDepotMarker || cell != collectionDepotCell)
+        {
+            return;
+        }
+
+        GameObject marker = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        marker.name = $"CollectionDepot_A_{cell.x}_{cell.y}";
+        marker.transform.SetParent(generatedRoot, true);
+
+        Vector3 markerScale = new Vector3(
+            tileSize * Mathf.Max(0.01f, depotMarkerScale.x),
+            tileSize * Mathf.Max(0.01f, depotMarkerScale.y),
+            tileSize * Mathf.Max(0.01f, depotMarkerScale.z));
+        marker.transform.localScale = markerScale;
+        marker.transform.position = worldPosition + Vector3.up * (markerScale.y * 0.5f);
+
+        Renderer renderer = marker.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            renderer.material.color = depotMarkerColor;
+        }
+    }
+
+    public Vector3 GridToWorldPosition(int x, int y)
     {
         return transform.TransformPoint(GridToLocalPosition(x, y));
     }
