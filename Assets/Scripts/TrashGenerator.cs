@@ -8,6 +8,15 @@ public class TrashGenerator : MonoBehaviour
     
     [Header("Trash 프리팹")]
     public GameObject trashPrefab;
+    public TrashPool trashPool; // optional: assign a TrashPool to use pooling
+    public bool autoCreatePool = true;
+    public int autoPoolInitialSize = 30;
+    [Header("Profiling")]
+    public bool enableSpawnProfiling = true;
+    public int profilingWindow = 100;
+
+    private int profileCount = 0;
+    private float profileAccum = 0f;
 
     [Header("쓰레기통 연동")]
     public TrashCanFillSensor trashCanFillSensor;
@@ -38,6 +47,26 @@ public class TrashGenerator : MonoBehaviour
             trashCanFillSensor = FindAnyObjectByType<TrashCanFillSensor>();
         }
 
+        if (trashPool == null && trashPrefab != null)
+        {
+            TrashPool existing = FindAnyObjectByType<TrashPool>();
+            if (existing != null && existing.prefab == trashPrefab)
+            {
+                trashPool = existing;
+            }
+            else if (autoCreatePool && trashPrefab != null)
+            {
+                GameObject poolGO = new GameObject($"TrashPool_{trashPrefab.name}");
+                var pool = poolGO.AddComponent<TrashPool>();
+                pool.prefab = trashPrefab;
+                pool.initialSize = autoPoolInitialSize;
+                poolGO.transform.SetParent(this.transform, false);
+                trashPool = pool;
+            }
+        }
+
+        // pooling not configured here
+
         // 첫 생성 시간 설정
         nextSpawnTime = Random.Range(0f, spawnInterval);
     }
@@ -48,8 +77,8 @@ public class TrashGenerator : MonoBehaviour
         
         if (spawnTimer >= nextSpawnTime && CanSpawnTrash())
         {
-            SpawnTrash();
-            
+            StartCoroutine(SpawnTrashCoroutine());
+
             // 다음 생성 시간 설정
             nextSpawnTime = spawnInterval + Random.Range(-spawnRandomRange, spawnRandomRange);
             spawnTimer = 0f;
@@ -86,32 +115,58 @@ public class TrashGenerator : MonoBehaviour
         return trashCanFillSensor.RightFillRatio < stopSpawnFillRatio;
     }
     
-    void SpawnTrash()
+    System.Collections.IEnumerator SpawnTrashCoroutine()
     {
         if (trashPrefab == null)
         {
             Debug.LogError("Trash prefab이 설정되지 않았습니다!");
-            return;
+            yield break;
         }
-        
+
         // 비어 있는 쪽 또는 덜 찬 쪽을 우선 선택
         Transform spawnPosition = SelectSpawnPosition();
-        
+
         if (spawnPosition == null)
         {
             Debug.LogError("Trash 생성 위치가 설정되지 않았습니다!");
-            return;
+            yield break;
         }
-        
+
         // 생성 위치에 오프셋 추가
         Vector3 offsetPosition = spawnPosition.position + new Vector3(
             Random.Range(-positionOffsetX, positionOffsetX),
             0f,
             Random.Range(-positionOffsetZ, positionOffsetZ)
         );
-        
-        // Trash 생성
-        GameObject trash = Instantiate(trashPrefab, offsetPosition, spawnPosition.rotation);
+
+        // short stagger to spread instantiation across frames when many generators run
+        float stagger = Random.Range(0f, 0.05f);
+        if (stagger > 0f) yield return new WaitForSeconds(stagger);
+
+        float t0 = enableSpawnProfiling ? Time.realtimeSinceStartup : 0f;
+
+        GameObject trash;
+        if (trashPool != null)
+        {
+            trash = trashPool.Get(offsetPosition, spawnPosition.rotation);
+        }
+        else
+        {
+            trash = Instantiate(trashPrefab, offsetPosition, spawnPosition.rotation);
+        }
+
+        if (enableSpawnProfiling)
+        {
+            float dt = Time.realtimeSinceStartup - t0;
+            profileAccum += dt;
+            profileCount++;
+            if (profileCount >= profilingWindow)
+            {
+                Debug.Log($"[TrashGenerator] Spawn profiling: avg {profileAccum / profileCount:F4}s over {profileCount} samples");
+                profileCount = 0;
+                profileAccum = 0f;
+            }
+        }
 
         // 쓰레기통 센서가 감지할 수 있도록 마커를 보장합니다.
         TrashItemMarker marker = trash.GetComponent<TrashItemMarker>();
@@ -129,7 +184,7 @@ public class TrashGenerator : MonoBehaviour
         {
             marker.spawnSide = TrashItemMarker.SpawnSide.Right;
         }
-        
+
         // Rigidbody에 힘 추가해서 굴러다니게 함
         Rigidbody rb = trash.GetComponent<Rigidbody>();
         if (rb != null)
@@ -139,8 +194,14 @@ public class TrashGenerator : MonoBehaviour
                 forceY,
                 Random.Range(minForceZ, maxForceZ)
             );
-            rb.AddForce(force, ForceMode.Impulse);
+
+            // prepare spawned object and defer physics impulse to next frame
+            PrepareSpawnedTrash(trash);
+            rb.isKinematic = true;
+            StartCoroutine(ApplyForceNextFrame(rb, force));
         }
+
+        yield break;
     }
 
     Transform SelectSpawnPosition()
@@ -179,5 +240,80 @@ public class TrashGenerator : MonoBehaviour
         }
 
         return Random.value > 0.5f ? trashGenerateL : trashGenerateR;
+    }
+
+    private void PrepareSpawnedTrash(GameObject go)
+    {
+        if (go == null) return;
+
+        // disable animators and particle emissions briefly to reduce startup cost
+        Animator[] anims = go.GetComponentsInChildren<Animator>(true);
+        foreach (var a in anims)
+        {
+            a.enabled = false;
+        }
+
+        ParticleSystem[] parts = go.GetComponentsInChildren<ParticleSystem>(true);
+        foreach (var p in parts)
+        {
+            var em = p.emission;
+            em.enabled = false;
+        }
+
+        // disable other MonoBehaviours (except a small allowlist) to reduce startup cost
+        var allowList = new System.Type[] { typeof(TrashItemMarker), typeof(TrashPooled) };
+        DisabledComponentHolder holder = go.GetComponent<DisabledComponentHolder>();
+        if (holder == null)
+        {
+            holder = go.AddComponent<DisabledComponentHolder>();
+        }
+
+        MonoBehaviour[] monos = go.GetComponentsInChildren<MonoBehaviour>(true);
+        foreach (var mb in monos)
+        {
+            if (mb == null) continue;
+            System.Type t = mb.GetType();
+            bool keep = false;
+            foreach (var kt in allowList)
+            {
+                if (kt.IsAssignableFrom(t)) { keep = true; break; }
+            }
+            if (!keep && mb.enabled)
+            {
+                mb.enabled = false;
+                holder.disabled.Add(mb);
+            }
+        }
+
+        // re-enable after short delay
+        StartCoroutine(ReenableComponentsNextFrame(go, 0.5f));
+    }
+
+    private System.Collections.IEnumerator ReenableComponentsNextFrame(GameObject go, float delay)
+    {
+        if (go == null) yield break;
+        yield return new WaitForSeconds(delay);
+
+        Animator[] anims = go.GetComponentsInChildren<Animator>(true);
+        foreach (var a in anims)
+        {
+            if (a != null) a.enabled = true;
+        }
+
+        ParticleSystem[] parts = go.GetComponentsInChildren<ParticleSystem>(true);
+        foreach (var p in parts)
+        {
+            if (p == null) continue;
+            var em = p.emission;
+            em.enabled = true;
+        }
+    }
+
+    private System.Collections.IEnumerator ApplyForceNextFrame(Rigidbody rb, Vector3 force)
+    {
+        yield return null;
+        if (rb == null) yield break;
+        rb.isKinematic = false;
+        rb.AddForce(force, ForceMode.Impulse);
     }
 }

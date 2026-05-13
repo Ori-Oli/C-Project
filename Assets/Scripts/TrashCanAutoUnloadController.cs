@@ -5,22 +5,32 @@ public class TrashCanAutoUnloadController : MonoBehaviour
     [Header("References")]
     public TrashCanFillSensor fillSensor;
 
-    [Header("Auto Unload Settings")]
-    [Tooltip("센서에 닿은 상태가 이 시간(초) 이상 지속되면 자동 삭제됩니다.")]
-    [Min(0.1f)] public float holdDuration = 5f;
-    public bool unloadLeftSide = true;
-    public bool unloadRightSide = true;
+    [Header("Auto Unload / Full Signal Settings")]
+    [Tooltip("센서에 닿은 상태가 이 시간(초) 이상 지속되면 '풀' 신호를 보냅니다.")]
+    [Min(0.1f)] public float holdDuration = 3f;
+    public bool watchLeftSide = true;
+    public bool watchRightSide = true;
 
     private float leftFullTimer;
     private float rightFullTimer;
     private float leftLastLogTime = -1f;
     private float rightLastLogTime = -1f;
+    private bool hasSignaledFull = false;
 
     private void Awake()
     {
         if (fillSensor == null)
         {
             fillSensor = GetComponentInParent<TrashCanFillSensor>();
+        }
+        if (fillSensor != null)
+        {
+            fillSensor.onEmptied.AddListener(() =>
+            {
+                hasSignaledFull = false;
+                ResetTimer(true);
+                ResetTimer(false);
+            });
         }
     }
 
@@ -31,8 +41,11 @@ public class TrashCanAutoUnloadController : MonoBehaviour
             return;
         }
 
-        UpdateSideTimer(isLeftSide: true, unloadLeftSide);
-        UpdateSideTimer(isLeftSide: false, unloadRightSide);
+        if (!hasSignaledFull)
+        {
+            UpdateSideTimer(isLeftSide: true, watchLeftSide);
+            UpdateSideTimer(isLeftSide: false, watchRightSide);
+        }
     }
 
     private void UpdateSideTimer(bool isLeftSide, bool canUnloadSide)
@@ -74,8 +87,10 @@ public class TrashCanAutoUnloadController : MonoBehaviour
             return;
         }
 
-        fillSensor.ClearTrackedTrashOnSide(isLeftSide);
-        ResetTimer(isLeftSide);
+        // Signal full (no automatic clearing). Truck must be present to unload.
+        fillSensor.SignalFull();
+        hasSignaledFull = true;
+        Debug.Log($"[TrashCanAutoUnload] Full signaled by side {(isLeftSide ? "Left" : "Right")}");
     }
 
     private void AddTimer(bool isLeftSide, float deltaTime)

@@ -77,8 +77,8 @@ public class RoadConnection
 public class CityGenerator : MonoBehaviour
 {
     [Header("Grid Settings")]
-    [Min(1)] public int width = 20;
-    [Min(1)] public int height = 20;
+    [Min(1)] public int width = 50;
+    [Min(1)] public int height = 50;
     [Tooltip("World-space spacing between grid cells. Set this to the actual X/Z size of one tile prefab.")]
     [Min(0.01f)] public float tileSize = 1f;
 
@@ -94,7 +94,7 @@ public class CityGenerator : MonoBehaviour
     [Header("Generation Settings")]
     public bool useMapFile = true;
     public TextAsset mapTextAsset;
-    public string mapFilePath = "Assets/Scripts/100x100.map";
+    public string mapFilePath = "Assets/Scripts/50x50.map";
     public bool syncGridSizeToMap = true;
     public bool mapFirstLineIsTop = true;
     public bool populateBuildingsOnMapEmptyCells = false;
@@ -130,7 +130,7 @@ public class CityGenerator : MonoBehaviour
     public bool fitTilePrefabsToTileSize = true;
 
     [Header("Trash Cans")]
-    [Range(0f, 1f)] public float trashCanProbability = 0.15f;
+    [Range(0f, 1f)] public float trashCanProbability = 0.1f;
     [Range(0f, 1f)] public float trashCanDensityMultiplier = 0.33f;
     public bool generateOnStart = true;
     public bool logGenerationDiagnostics = true;
