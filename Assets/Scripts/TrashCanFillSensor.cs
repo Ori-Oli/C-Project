@@ -27,6 +27,7 @@ public class TrashCanFillSensor : MonoBehaviour
     public UnityEvent onBecameFull;
     public UnityEvent onEmptied;
     public UnityEvent<bool> onSideEmptied;
+    public UnityEvent onFullSignaled;
 
     public int CurrentTrashCount => trackedObjects.Count;
     public float LeftFillRatio => CalculateSideFillRatio(isLeftSide: true);
@@ -129,16 +130,7 @@ public class TrashCanFillSensor : MonoBehaviour
             {
                 continue;
             }
-
-            if (destroyImmediately)
-            {
-                DestroyImmediate(target);
-            }
-            else
-            {
-                Destroy(target);
-            }
-
+            TryReturnToPoolOrDestroy(target, destroyImmediately);
             removedCount++;
         }
 
@@ -170,15 +162,7 @@ public class TrashCanFillSensor : MonoBehaviour
                 continue;
             }
 
-            if (destroyImmediately)
-            {
-                DestroyImmediate(target);
-            }
-            else
-            {
-                Destroy(target);
-            }
-
+            TryReturnToPoolOrDestroy(target, destroyImmediately);
             trackedObjects.Remove(target);
             removedCount++;
         }
@@ -192,6 +176,63 @@ public class TrashCanFillSensor : MonoBehaviour
         }
 
         return removedCount;
+    }
+
+    private void TryReturnToPoolOrDestroy(GameObject target, bool destroyImmediately)
+    {
+        if (target == null) return;
+
+        TrashPooled pooled = target.GetComponent<TrashPooled>();
+        if (pooled != null && pooled.pool != null)
+        {
+            // return to pool via interface if available
+            try
+            {
+                pooled.pool.Return(target);
+                return;
+            }
+            catch
+            {
+                // fallback to destroy
+            }
+        }
+
+        if (destroyImmediately)
+        {
+            DestroyImmediate(target);
+        }
+        else
+        {
+            Destroy(target);
+        }
+    }
+
+    // Full-signal: set when can reports full (e.g. after contact hold)
+    private bool fullSignaled;
+
+    public bool IsFullSignaled => fullSignaled;
+
+    public void SignalFull()
+    {
+        if (fullSignaled)
+        {
+            return;
+        }
+
+        fullSignaled = true;
+        Debug.Log("[TrashCanFillSensor] Full signal emitted");
+        onFullSignaled?.Invoke();
+    }
+
+    public void ClearFullSignal()
+    {
+        if (!fullSignaled)
+        {
+            return;
+        }
+
+        fullSignaled = false;
+        Debug.Log("[TrashCanFillSensor] Full signal cleared");
     }
 
     public float GetHeightFillRatio()

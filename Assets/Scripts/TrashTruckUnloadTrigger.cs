@@ -54,6 +54,9 @@ public class TrashTruckUnloadTrigger : MonoBehaviour
             return false;
         }
 
+        // After unloading, clear any full signal so system can resume
+        fillSensor.ClearFullSignal();
+
         onTrashUnloaded?.Invoke(removedCount);
         return true;
     }
@@ -86,7 +89,7 @@ public class TrashTruckUnloadTrigger : MonoBehaviour
     {
         if (onlyWhenSensorIsFull)
         {
-            return fillSensor.IsFull;
+            return fillSensor != null && fillSensor.IsFullSignaled;
         }
 
         return fillSensor.FillRatio >= requiredFillRatio;
