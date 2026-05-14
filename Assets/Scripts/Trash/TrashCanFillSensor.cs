@@ -39,6 +39,7 @@ public class TrashCanFillSensor : MonoBehaviour
     public bool RightIsFull => RightFillRatio >= fullHeightRatio;
 
     private readonly HashSet<GameObject> trackedObjects = new HashSet<GameObject>();
+    private readonly HashSet<GameObject> ownedObjects = new HashSet<GameObject>();
     private bool wasFull;
 
     private void Reset()
@@ -139,6 +140,75 @@ public class TrashCanFillSensor : MonoBehaviour
         return removedCount;
     }
 
+    public void RegisterOwnedTrash(GameObject trashObject)
+    {
+        if (trashObject == null)
+        {
+            return;
+        }
+
+        ownedObjects.Add(trashObject);
+    }
+
+    public void UnregisterOwnedTrash(GameObject trashObject)
+    {
+        if (trashObject == null)
+        {
+            return;
+        }
+
+        ownedObjects.Remove(trashObject);
+    }
+
+    public int ClearAllTrash(bool destroyImmediately = false)
+    {
+        int removedCount = 0;
+        HashSet<GameObject> targets = new HashSet<GameObject>();
+
+        foreach (GameObject owned in ownedObjects)
+        {
+            if (owned != null)
+            {
+                targets.Add(owned);
+            }
+        }
+
+        foreach (GameObject tracked in trackedObjects)
+        {
+            if (tracked == null)
+            {
+                continue;
+            }
+
+            TrashItemMarker marker = tracked.GetComponent<TrashItemMarker>();
+            if (marker == null || marker.ownerSensor == null || marker.ownerSensor == this)
+            {
+                targets.Add(tracked);
+            }
+        }
+
+        foreach (GameObject target in targets)
+        {
+            if (target == null)
+            {
+                continue;
+            }
+
+            TryReturnToPoolOrDestroy(target, destroyImmediately);
+            removedCount++;
+        }
+
+        foreach (GameObject target in targets)
+        {
+            trackedObjects.Remove(target);
+            ownedObjects.Remove(target);
+        }
+
+        NotifyFillChanged();
+        Debug.Log($"[TrashCanFillSensor] 소유 쓰레기 제거 완료: {removedCount}개");
+        return removedCount;
+    }
+
     public int ClearTrackedTrashOnSide(bool isLeftSide, bool destroyImmediately = false)
     {
         TrashItemMarker.SpawnSide targetSide = isLeftSide ? TrashItemMarker.SpawnSide.Left : TrashItemMarker.SpawnSide.Right;
@@ -181,6 +251,15 @@ public class TrashCanFillSensor : MonoBehaviour
     private void TryReturnToPoolOrDestroy(GameObject target, bool destroyImmediately)
     {
         if (target == null) return;
+
+        trackedObjects.Remove(target);
+        ownedObjects.Remove(target);
+
+        TrashItemMarker marker = target.GetComponent<TrashItemMarker>();
+        if (marker != null && marker.ownerSensor == this)
+        {
+            marker.ownerSensor = null;
+        }
 
         TrashPooled pooled = target.GetComponent<TrashPooled>();
         if (pooled != null && pooled.pool != null)
@@ -290,9 +369,23 @@ public class TrashCanFillSensor : MonoBehaviour
             return false;
         }
 
+        if (marker != null && marker.ownerSensor != null && marker.ownerSensor != this)
+        {
+            return false;
+        }
+
         if (marker != null)
         {
             trackedObject = marker.gameObject;
+            if (marker.ownerSensor == null)
+            {
+                marker.ownerSensor = this;
+            }
+
+            if (marker.ownerSensor == this)
+            {
+                ownedObjects.Add(trackedObject);
+            }
         }
         else if (other.attachedRigidbody != null)
         {
@@ -483,13 +576,15 @@ public class TrashCanFillSensor : MonoBehaviour
 
     private bool CleanupDestroyedTrackedObjects()
     {
-        if (trackedObjects.Count == 0)
-        {
-            return false;
-        }
+        int trackedRemovedCount = trackedObjects.Count == 0
+            ? 0
+            : trackedObjects.RemoveWhere(trackedObject => trackedObject == null);
 
-        int removedCount = trackedObjects.RemoveWhere(trackedObject => trackedObject == null);
-        return removedCount > 0;
+        int ownedRemovedCount = ownedObjects.Count == 0
+            ? 0
+            : ownedObjects.RemoveWhere(ownedObject => ownedObject == null);
+
+        return trackedRemovedCount > 0 || ownedRemovedCount > 0;
     }
 
     private void NotifyFillChanged()

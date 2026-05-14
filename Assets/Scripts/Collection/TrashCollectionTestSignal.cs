@@ -28,7 +28,6 @@ public class TrashCollectionTestSignal : MonoBehaviour
 #if ENABLE_INPUT_SYSTEM
     public Key keyboardTriggerKey = Key.F;
 #endif
-    public bool showGuiButton = true;
 
     [Header("Fill")]
     public TrashTestTargetMode targetMode = TrashTestTargetMode.Random;
@@ -76,19 +75,6 @@ public class TrashCollectionTestSignal : MonoBehaviour
                 repeatTimer = 0f;
                 FillTrashCans();
             }
-        }
-    }
-
-    private void OnGUI()
-    {
-        if (!showGuiButton)
-        {
-            return;
-        }
-
-        if (GUI.Button(new Rect(16f, 16f, 180f, 36f), "Fill Trash Can Test"))
-        {
-            FillTrashCans();
         }
     }
 

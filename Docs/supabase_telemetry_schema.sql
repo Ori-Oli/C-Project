@@ -5,9 +5,6 @@ create table if not exists trash_bin_state_latest (
   y double precision not null,
   z double precision not null,
   is_full boolean not null default false,
-  fill_ratio double precision not null default 0,
-  current_amount integer not null default 0,
-  capacity integer not null default 0,
   updated_at timestamptz not null default now(),
   primary key (simulation_id, bin_id)
 );

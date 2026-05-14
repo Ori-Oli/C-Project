@@ -51,9 +51,6 @@ public static class SupabaseTelemetryJson
         AppendFloat(builder, "y", payload.y, true);
         AppendFloat(builder, "z", payload.z, true);
         AppendBool(builder, "is_full", payload.is_full, true);
-        AppendFloat(builder, "fill_ratio", payload.fill_ratio, true);
-        AppendInt(builder, "current_amount", payload.current_amount, true);
-        AppendInt(builder, "capacity", payload.capacity, true);
         AppendString(builder, "updated_at", payload.updated_at, true);
         builder.Append('}');
     }
