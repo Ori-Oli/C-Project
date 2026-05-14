@@ -187,6 +187,8 @@ public class TrashCollectionTestSignal : MonoBehaviour
         dispatcher.cityGenerator = cityGenerator;
         dispatcher.spawnPlaceholderTrucksIfNone = true;
         dispatcher.placeholderTruckCount = 5;
+        dispatcher.placeTrucksAtMapDepot = true;
+        dispatcher.mapDepotTruckHeight = 0.25f;
 
         if (logSignals)
         {

@@ -43,13 +43,33 @@ public class GarbageTruckController : MonoBehaviour
         cityGenerator = city;
         dispatcher = owner;
 
-        if (snapToDepotOnInitialize && cityGenerator != null && cityGenerator.CollectionDepotCell != null)
-        {
-            currentGridPosition = cityGenerator.CollectionDepotGridPosition;
-            transform.position = cityGenerator.GridToWorldPosition(currentGridPosition.x, currentGridPosition.y) + depotParkingOffset;
-        }
+        SnapToDepotIfAvailable();
 
         EnsureCubeBody();
+    }
+
+    public void SnapToDepotIfAvailable()
+    {
+        SnapToDepotIfAvailable(false);
+    }
+
+    public bool SnapToDepotIfAvailable(bool forceSnap)
+    {
+        if ((!forceSnap && !snapToDepotOnInitialize) || cityGenerator == null || cityGenerator.CollectionDepotCell == null)
+        {
+            return false;
+        }
+
+        currentGridPosition = cityGenerator.CollectionDepotGridPosition;
+        transform.position = cityGenerator.GridToWorldPosition(currentGridPosition.x, currentGridPosition.y) + depotParkingOffset;
+        return true;
+    }
+
+    public bool SnapToGridPosition(Vector2Int gridPosition, Vector3 worldPosition)
+    {
+        currentGridPosition = gridPosition;
+        transform.position = worldPosition + depotParkingOffset;
+        return true;
     }
 
     public bool TryAssignTrashCan(TrashCanStatus trashCan, List<Vector2Int> path)
@@ -138,8 +158,21 @@ public class GarbageTruckController : MonoBehaviour
 
         if (trashCan != null)
         {
+            Debug.Log($"[GarbageTruckController] 쓰레기통 회수 중...", gameObject);
+
+            // 센서에서 모든 쓰레기 제거 (센서 범위 밖 포함)
+            TrashCanFillSensor fillSensor = trashCan.GetComponentInChildren<TrashCanFillSensor>();
+            if (fillSensor != null)
+            {
+                int removedCount = fillSensor.ClearAllTrash();
+                fillSensor.ClearFullSignal();
+                Debug.Log($"[GarbageTruckController] 쓰레기통에서 {removedCount}개 쓰레기 수거", gameObject);
+            }
+
+            // 상태 상자 정리
             trashCan.Empty();
             currentLoad = Mathf.Min(maxLoad, currentLoad + 1);
+            Debug.Log($"[GarbageTruckController] 쓰레기통 회수 완료! 현재 로드: {currentLoad}/{maxLoad}", gameObject);
         }
 
         State = GarbageTruckState.Idle;

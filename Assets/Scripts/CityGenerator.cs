@@ -132,6 +132,7 @@ public class CityGenerator : MonoBehaviour
     [Header("Trash Cans")]
     [Range(0f, 1f)] public float trashCanProbability = 0.1f;
     [Range(0f, 1f)] public float trashCanDensityMultiplier = 0.33f;
+
     public bool generateOnStart = true;
     public bool logGenerationDiagnostics = true;
     public bool enableRoadDebugLog = false;
@@ -221,7 +222,6 @@ public class CityGenerator : MonoBehaviour
             PopulateBuildingBlocks();
         }
 
-        PlaceTrashCans();
         LogGenerationDiagnostics();
         SpawnPrefabsFromGrid();
         CityGenerated?.Invoke();
@@ -404,6 +404,13 @@ public class CityGenerator : MonoBehaviour
         if (value == '1')
         {
             SetRoadCell(x, y);
+            return;
+        }
+
+        if (value == 'T')
+        {
+            SetRoadCell(x, y);
+            grid[x, y].hasTrashCan = true;
             return;
         }
 
@@ -900,35 +907,6 @@ public class CityGenerator : MonoBehaviour
         }
     }
 
-    private void PlaceTrashCans()
-    {
-        float actualTrashCanProbability = Mathf.Clamp01(trashCanProbability * trashCanDensityMultiplier);
-
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                CityCell cell = grid[x, y];
-                if (cell.tileType != TileType.Road)
-                {
-                    continue;
-                }
-
-                if (cell == collectionDepotCell)
-                {
-                    continue;
-                }
-
-                if (Random.value <= actualTrashCanProbability)
-                {
-                    cell.hasTrashCan = true;
-                    cell.walkable = true;
-                    cell.moveCost = 2;
-                }
-            }
-        }
-    }
-
     private void SpawnPrefabsFromGrid()
     {
         generatedRoot = new GameObject("Generated City").transform;
@@ -949,6 +927,37 @@ public class CityGenerator : MonoBehaviour
                 SpawnDepotMarker(cell, worldPosition);
             }
         }
+    }
+
+    private void SpawnTrashCanPrefab(CityCell cell, Vector3 worldPosition)
+    {
+        if (!cell.hasTrashCan)
+        {
+            return;
+        }
+
+        if (trashCanPrefab == null)
+        {
+            Debug.LogWarning($"Missing trash can prefab. Trash can at ({cell.x}, {cell.y}) was not spawned.");
+            return;
+        }
+
+        Vector3 trashCanPosition = worldPosition + new Vector3(0f, 0.05f, 0f);
+        GameObject spawnedTrashCan = Instantiate(trashCanPrefab, trashCanPosition, Quaternion.identity, generatedRoot);
+        spawnedTrashCan.name = $"TrashCan_{cell.x}_{cell.y}";
+
+        TrashCanStatus status = spawnedTrashCan.GetComponent<TrashCanStatus>();
+        if (status == null)
+        {
+            status = spawnedTrashCan.GetComponentInChildren<TrashCanStatus>();
+        }
+
+        if (status == null)
+        {
+            status = spawnedTrashCan.AddComponent<TrashCanStatus>();
+        }
+
+        status.Initialize(new Vector2Int(cell.x, cell.y));
     }
 
     private void SpawnTilePrefab(CityCell cell, Vector3 worldPosition)
@@ -1220,34 +1229,6 @@ public class CityGenerator : MonoBehaviour
         }
     }
 
-    private void SpawnTrashCanPrefab(CityCell cell, Vector3 worldPosition)
-    {
-        if (!cell.hasTrashCan)
-        {
-            return;
-        }
-
-        if (trashCanPrefab == null)
-        {
-            Debug.LogWarning($"Missing trash can prefab. Trash can at ({cell.x}, {cell.y}) was not spawned.");
-            return;
-        }
-
-        // If the trash can visually overlaps the road prefab, adjust this offset for your asset pivot and height.
-        Vector3 trashCanPosition = worldPosition + new Vector3(0f, 0.05f, 0f);
-        GameObject spawnedTrashCan = Instantiate(trashCanPrefab, trashCanPosition, Quaternion.identity, generatedRoot);
-        spawnedTrashCan.name = $"TrashCan_{cell.x}_{cell.y}";
-        cell.spawnedObject = spawnedTrashCan;
-
-        TrashCanStatus status = spawnedTrashCan.GetComponent<TrashCanStatus>();
-        if (status == null)
-        {
-            status = spawnedTrashCan.AddComponent<TrashCanStatus>();
-        }
-
-        status.Initialize(new Vector2Int(cell.x, cell.y));
-    }
-
     private void SpawnDepotMarker(CityCell cell, Vector3 worldPosition)
     {
         if (!spawnDepotMarker || cell != collectionDepotCell)
@@ -1421,10 +1402,8 @@ public class CityGenerator : MonoBehaviour
             $"intersections={CountFourWayRoadIntersections()}, intersectionPrefab={GetPrefabName(intersectionRoadPrefab)}, " +
             $"buildingFootprints={buildingFootprints.Count}, spawnBuildingsAsFootprints={spawnBuildingsAsFootprints}, " +
             $"buildingSize=({minBuildingWidth}-{maxBuildingWidth}, {minBuildingHeight}-{maxBuildingHeight}), " +
-            $"buildingFillChance={buildingFillChance:0.###}, emptySpaceChance={emptySpaceChance:0.###}, " +
-            $"trashCanProbability={trashCanProbability:0.###}, trashCanDensityMultiplier={trashCanDensityMultiplier:0.###}, " +
-            $"actualTrashCanProbability={Mathf.Clamp01(trashCanProbability * trashCanDensityMultiplier):0.###}, " +
-            $"roadPrefab={GetPrefabName(roadPrefab)}, roadFootprint={GetPrefabFootprintXZ(roadPrefab)}, " +
+                $"buildingFillChance={buildingFillChance:0.###}, emptySpaceChance={emptySpaceChance:0.###}, " +
+                $"roadPrefab={GetPrefabName(roadPrefab)}, roadFootprint={GetPrefabFootprintXZ(roadPrefab)}, " +
             $"buildingPrefab={GetPrefabName(buildingPrefab)}, buildingFootprint={GetPrefabFootprintXZ(buildingPrefab)}");
     }
 
@@ -1596,7 +1575,6 @@ public class CityGenerator : MonoBehaviour
         }
 
         Vector3 gizmoSize = new Vector3(tileSize, 0.05f, tileSize);
-        Vector3 trashCanGizmoSize = Vector3.one * tileSize * 0.35f;
 
         for (int x = 0; x < width; x++)
         {
@@ -1609,12 +1587,6 @@ public class CityGenerator : MonoBehaviour
                 Gizmos.color = GetGizmoColor(cell);
                 Gizmos.DrawCube(center, gizmoSize);
                 Gizmos.DrawWireCube(center, gizmoSize);
-
-                if (cell.hasTrashCan)
-                {
-                    Gizmos.color = trashCanGizmoColor;
-                    Gizmos.DrawSphere(center + Vector3.up * 0.25f, trashCanGizmoSize.x);
-                }
             }
         }
 
