@@ -8,17 +8,20 @@
    - anon public key
 
 `service_role` key는 Unity/WebGL 클라이언트에 넣지 않는다.
+`DATABASE_URL`도 Unity/WebGL 클라이언트에 넣지 않는다.
 
 ## Unity
 
-1. 씬에 빈 GameObject를 만든다. 예: `SupabaseTelemetry`
-2. 같은 GameObject에 아래 컴포넌트를 추가한다.
+1. 프로젝트 루트의 `.env.example`을 참고해서 로컬 `.env`를 만든다.
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+2. 씬에 빈 GameObject를 만든다. 예: `SupabaseTelemetry`
+3. 같은 GameObject에 아래 컴포넌트를 추가한다.
    - `SupabaseTelemetryUploader`
    - `SimulationTelemetryReporter`
-3. `SupabaseTelemetryUploader`에 Supabase 값을 입력한다.
-   - `Supabase Url`: `https://xxxxx.supabase.co`
-   - `Anon Key`: Supabase anon public key
 4. 기본 업로드 주기는 `SimulationTelemetryReporter.uploadIntervalSeconds = 1`초다.
+
+`SupabaseTelemetryUploader`는 Play Mode/Standalone에서 `.env`를 자동으로 읽는다. WebGL 배포 빌드는 브라우저 런타임에서 로컬 `.env`를 읽을 수 없으므로, 빌드용 씬/프리팹에는 `Supabase Url`과 `Anon Key` 값을 인스펙터에 넣거나 별도 배포 설정으로 주입해야 한다.
 
 ## Uploaded Tables
 

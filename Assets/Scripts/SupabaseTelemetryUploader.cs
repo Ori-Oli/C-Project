@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#if !UNITY_WEBGL
+using System.IO;
+#endif
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -13,6 +16,10 @@ public class SupabaseTelemetryUploader : MonoBehaviour
     [Tooltip("Use only the anon public key in Unity/WebGL builds.")]
     public string anonKey = "";
 
+    [Header("Local Environment")]
+    public bool loadLocalEnvironment = true;
+    public string localEnvironmentFileName = ".env";
+
     [Header("Tables")]
     public string trashBinStateTable = "trash_bin_state_latest";
     public string trashTruckStateTable = "trash_truck_state_latest";
@@ -24,6 +31,11 @@ public class SupabaseTelemetryUploader : MonoBehaviour
     public bool logUploadErrors = true;
 
     public bool IsUploading { get; private set; }
+
+    private void Awake()
+    {
+        LoadConfigFromEnvironment();
+    }
 
     public void UploadLatestState(
         IReadOnlyList<TrashBinTelemetryPayload> trashBins,
@@ -111,5 +123,89 @@ public class SupabaseTelemetryUploader : MonoBehaviour
     {
         return !string.IsNullOrWhiteSpace(supabaseUrl)
             && !string.IsNullOrWhiteSpace(anonKey);
+    }
+
+    private void LoadConfigFromEnvironment()
+    {
+        if (!loadLocalEnvironment)
+        {
+            return;
+        }
+
+        ApplyConfigValue("SUPABASE_URL", Environment.GetEnvironmentVariable("SUPABASE_URL"));
+        ApplyConfigValue("SUPABASE_ANON_KEY", Environment.GetEnvironmentVariable("SUPABASE_ANON_KEY"));
+
+#if !UNITY_WEBGL
+        if (HasSupabaseConfig() || string.IsNullOrWhiteSpace(localEnvironmentFileName))
+        {
+            return;
+        }
+
+        string envPath = Path.Combine(Application.dataPath, "..", localEnvironmentFileName);
+        if (!File.Exists(envPath))
+        {
+            return;
+        }
+
+        string[] lines = File.ReadAllLines(envPath);
+        for (int i = 0; i < lines.Length; i++)
+        {
+            ApplyEnvironmentLine(lines[i]);
+        }
+#endif
+    }
+
+    private void ApplyEnvironmentLine(string line)
+    {
+        if (string.IsNullOrWhiteSpace(line))
+        {
+            return;
+        }
+
+        string trimmed = line.Trim();
+        if (trimmed.StartsWith("#", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        int separatorIndex = trimmed.IndexOf('=');
+        if (separatorIndex <= 0)
+        {
+            return;
+        }
+
+        string key = trimmed.Substring(0, separatorIndex).Trim();
+        string value = trimmed.Substring(separatorIndex + 1).Trim();
+        value = UnquoteEnvironmentValue(value);
+        ApplyConfigValue(key, value);
+    }
+
+    private void ApplyConfigValue(string key, string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        if (key == "SUPABASE_URL" && string.IsNullOrWhiteSpace(supabaseUrl))
+        {
+            supabaseUrl = value;
+        }
+        else if (key == "SUPABASE_ANON_KEY" && string.IsNullOrWhiteSpace(anonKey))
+        {
+            anonKey = value;
+        }
+    }
+
+    private string UnquoteEnvironmentValue(string value)
+    {
+        if (value.Length >= 2
+            && ((value[0] == '"' && value[value.Length - 1] == '"')
+                || (value[0] == '\'' && value[value.Length - 1] == '\'')))
+        {
+            return value.Substring(1, value.Length - 2);
+        }
+
+        return value;
     }
 }
