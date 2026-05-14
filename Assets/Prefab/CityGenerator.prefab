@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 5267274562285421509}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.94951, y: 0.64297, z: -7.56198}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -44,8 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a79027732408c4295a961c82f5dcea2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CityGenerator
-  width: 20
-  height: 20
+  width: 10
+  height: 10
   tileSize: 1
   roadPrefab: {fileID: 100000, guid: 4f32dfddb033d3e40b5841bc53cc1689, type: 3}
   cornerRoadPrefab: {fileID: 100000, guid: 3a7e1c0a00828fd4196c8cd24886d2ed, type: 3}
@@ -56,7 +56,7 @@ MonoBehaviour:
   trashCanPrefab: {fileID: 6265023572636278062, guid: aab43fd86dd4043f4bfe0f4e06d81239, type: 3}
   useMapFile: 1
   mapTextAsset: {fileID: 0}
-  mapFilePath: Assets/Scripts/100x100.map
+  mapFilePath: Assets/Scripts/50x50.map
   syncGridSizeToMap: 1
   mapFirstLineIsTop: 1
   populateBuildingsOnMapEmptyCells: 0
@@ -88,6 +88,9 @@ MonoBehaviour:
   generateOnStart: 1
   logGenerationDiagnostics: 1
   enableRoadDebugLog: 0
+  spawnDepotMarker: 1
+  depotMarkerScale: {x: 0.8, y: 0.5, z: 0.8}
+  depotMarkerColor: {r: 0.05, g: 0.55, b: 1, a: 1}
   roadGizmoColor: {r: 0.15, g: 0.15, b: 0.15, a: 0.35}
   buildingGizmoColor: {r: 0.6, g: 0.25, b: 0.15, a: 0.35}
   emptyGizmoColor: {r: 1, g: 1, b: 1, a: 0.08}

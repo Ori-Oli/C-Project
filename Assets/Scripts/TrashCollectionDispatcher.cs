@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,13 +12,19 @@ public class TrashCollectionDispatcher : MonoBehaviour
     [Min(1)] public int maxTruckCount = 5;
     public bool spawnPlaceholderTrucksIfNone = true;
     [Min(1)] public int placeholderTruckCount = 5;
+    [Tooltip("When enabled, every registered truck is placed on the map cell marked with 'A' after the city is generated.")]
+    public bool placeTrucksAtMapDepot = true;
+    [Tooltip("Vertical offset used when placing trucks on the map cell marked with 'A'.")]
+    public float mapDepotTruckHeight = 0.25f;
 
     [Header("Discovery")]
     public bool autoFindReferences = true;
     public bool logDispatchWarnings = true;
+    public bool logTruckPlacement = true;
 
     private readonly List<TrashCanStatus> trashCans = new List<TrashCanStatus>();
     private readonly List<TrashCanStatus> pendingTrashCans = new List<TrashCanStatus>();
+    private Coroutine initializeWhenReadyRoutine;
 
     private void Awake()
     {
@@ -43,15 +50,17 @@ public class TrashCollectionDispatcher : MonoBehaviour
         }
 
         UnsubscribeTrashCans();
+
+        if (initializeWhenReadyRoutine != null)
+        {
+            StopCoroutine(initializeWhenReadyRoutine);
+            initializeWhenReadyRoutine = null;
+        }
     }
 
     private void Start()
     {
-        EnsureTruckList();
-        SpawnPlaceholderTrucksIfNeeded();
-        InitializeTrucks();
-        RegisterExistingTrashCans();
-        TryDispatchIdleTrucks();
+        InitializeWhenCityIsReady();
     }
 
     public void RegisterFullTrashCan(TrashCanStatus trashCan)
@@ -92,12 +101,46 @@ public class TrashCollectionDispatcher : MonoBehaviour
 
     private void HandleCityGenerated()
     {
+        InitializeWhenCityIsReady();
+    }
+
+    private void InitializeWhenCityIsReady()
+    {
+        if (TryInitializeForGeneratedCity())
+        {
+            return;
+        }
+
+        if (initializeWhenReadyRoutine == null)
+        {
+            initializeWhenReadyRoutine = StartCoroutine(InitializeWhenReadyRoutine());
+        }
+    }
+
+    private IEnumerator InitializeWhenReadyRoutine()
+    {
+        while (!TryInitializeForGeneratedCity())
+        {
+            yield return null;
+        }
+
+        initializeWhenReadyRoutine = null;
+    }
+
+    private bool TryInitializeForGeneratedCity()
+    {
+        if (!HasUsableCity(false))
+        {
+            return false;
+        }
+
         pendingTrashCans.Clear();
         EnsureTruckList();
         SpawnPlaceholderTrucksIfNeeded();
         RegisterExistingTrashCans();
         InitializeTrucks();
         TryDispatchIdleTrucks();
+        return true;
     }
 
     private void EnsureTruckList()
@@ -123,19 +166,17 @@ public class TrashCollectionDispatcher : MonoBehaviour
 
     private void SpawnPlaceholderTrucksIfNeeded()
     {
-        if (!spawnPlaceholderTrucksIfNone || trucks.Count > 0 || !HasUsableCity())
+        if (!spawnPlaceholderTrucksIfNone || trucks.Count > 0)
         {
             return;
         }
 
         int count = Mathf.Clamp(placeholderTruckCount, 1, Mathf.Max(1, maxTruckCount));
-        float tileSize = cityGenerator != null ? cityGenerator.tileSize : 1f;
         for (int i = 0; i < count; i++)
         {
             GameObject truckObject = new GameObject($"GarbageTruck_{i + 1}");
             GarbageTruckController truck = truckObject.AddComponent<GarbageTruckController>();
-            float centeredIndex = i - (count - 1) * 0.5f;
-            truck.depotParkingOffset = new Vector3(centeredIndex * tileSize * 0.5f, 0f, -tileSize * 0.45f);
+            truck.depotParkingOffset = Vector3.zero;
             truck.maxLoad = 10;
             trucks.Add(truck);
         }
@@ -152,7 +193,33 @@ public class TrashCollectionDispatcher : MonoBehaviour
             }
 
             trucks[i].Initialize(cityGenerator, this);
+            if (placeTrucksAtMapDepot)
+            {
+                PlaceTruckAtMapDepot(trucks[i]);
+            }
         }
+    }
+
+    private bool PlaceTruckAtMapDepot(GarbageTruckController truck)
+    {
+        if (truck == null || cityGenerator == null || cityGenerator.CollectionDepotCell == null)
+        {
+            return false;
+        }
+
+        Vector2Int depotGridPosition = cityGenerator.CollectionDepotGridPosition;
+        Vector3 depotWorldPosition = cityGenerator.GridToWorldPosition(depotGridPosition.x, depotGridPosition.y);
+        depotWorldPosition.y = mapDepotTruckHeight;
+        bool placed = truck.SnapToGridPosition(depotGridPosition, depotWorldPosition);
+
+        if (placed && logTruckPlacement)
+        {
+            Debug.Log(
+                $"Placed truck '{truck.name}' at map depot A: grid={depotGridPosition}, world={depotWorldPosition}",
+                truck);
+        }
+
+        return placed;
     }
 
     private void RegisterExistingTrashCans()
@@ -301,12 +368,17 @@ public class TrashCollectionDispatcher : MonoBehaviour
 
     private bool HasUsableCity()
     {
+        return HasUsableCity(logDispatchWarnings);
+    }
+
+    private bool HasUsableCity(bool shouldLogWarnings)
+    {
         if (cityGenerator == null || cityGenerator.Grid == null)
         {
             return false;
         }
 
-        if (cityGenerator.CollectionDepotCell == null && logDispatchWarnings)
+        if (cityGenerator.CollectionDepotCell == null && shouldLogWarnings)
         {
             Debug.LogWarning("Collection depot was not found. Add 'A' to the map file.");
         }
