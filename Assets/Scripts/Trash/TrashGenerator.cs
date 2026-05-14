@@ -44,6 +44,11 @@ public class TrashGenerator : MonoBehaviour
     {
         if (trashCanFillSensor == null)
         {
+            trashCanFillSensor = GetComponentInParent<TrashCanFillSensor>();
+        }
+
+        if (trashCanFillSensor == null)
+        {
             trashCanFillSensor = FindAnyObjectByType<TrashCanFillSensor>();
         }
 
@@ -90,6 +95,12 @@ public class TrashGenerator : MonoBehaviour
         if (trashCanFillSensor == null)
         {
             return true;
+        }
+
+        // 가득 차면 생성 중단
+        if (trashCanFillSensor.IsFull)
+        {
+            return false;
         }
 
         return CanSpawnOnLeftSide() || CanSpawnOnRightSide();
@@ -173,6 +184,12 @@ public class TrashGenerator : MonoBehaviour
         if (marker == null)
         {
             marker = trash.AddComponent<TrashItemMarker>();
+        }
+
+        marker.ownerSensor = trashCanFillSensor;
+        if (trashCanFillSensor != null)
+        {
+            trashCanFillSensor.RegisterOwnedTrash(trash);
         }
 
         // Spawn side flag

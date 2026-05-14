@@ -9,9 +9,6 @@ public class TrashBinTelemetryPayload
     public float y;
     public float z;
     public bool is_full;
-    public float fill_ratio;
-    public int current_amount;
-    public int capacity;
     public string updated_at;
 }
 
@@ -40,10 +37,6 @@ public static class SupabaseTelemetryPayloadFactory
 
         TrashCanFillSensor fillSensor = trashCan.GetComponent<TrashCanFillSensor>();
         Vector3 position = trashCan.transform.position;
-        float fallbackFillRatio = trashCan.capacity > 0
-            ? Mathf.Clamp01((float)trashCan.currentAmount / trashCan.capacity)
-            : 0f;
-        float fillRatio = fillSensor != null ? Mathf.Clamp01(fillSensor.FillRatio) : fallbackFillRatio;
         bool isFull = trashCan.IsFull || (fillSensor != null && fillSensor.IsFull);
 
         return new TrashBinTelemetryPayload
@@ -54,9 +47,6 @@ public static class SupabaseTelemetryPayloadFactory
             y = position.y,
             z = position.z,
             is_full = isFull,
-            fill_ratio = fillRatio,
-            current_amount = trashCan.currentAmount,
-            capacity = trashCan.capacity,
             updated_at = timestampUtc
         };
     }

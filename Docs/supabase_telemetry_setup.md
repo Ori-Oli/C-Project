@@ -31,9 +31,6 @@
 - `bin_id`
 - `x`, `y`, `z`
 - `is_full`
-- `fill_ratio`
-- `current_amount`
-- `capacity`
 - `updated_at`
 
 `trash_truck_state_latest`

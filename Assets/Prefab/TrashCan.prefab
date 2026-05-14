@@ -733,6 +733,11 @@ MonoBehaviour:
   trashGenerateL: {fileID: 1870862470569563202}
   trashGenerateR: {fileID: 7401162139405463220}
   trashPrefab: {fileID: 3785331517200764130, guid: 8c92cbb5a059e4909b8e15cad32b8747, type: 3}
+  trashPool: {fileID: 0}
+  autoCreatePool: 1
+  autoPoolInitialSize: 30
+  enableSpawnProfiling: 1
+  profilingWindow: 100
   trashCanFillSensor: {fileID: 0}
   stopSpawnFillRatio: 0.8
   spawnInterval: 0.1
@@ -760,8 +765,10 @@ MonoBehaviour:
   plateTransform: {fileID: 1159296310329507787}
   slideAxis: {x: 1, y: 0, z: 0}
   startSlidingFillRatio: 0.8
+  moveOnFullOnly: 1
   maxTravelDistance: 0.2
   moveSpeed: 0.2
+  syncSensorSplitOffset: 1
 --- !u!114 &6904372508505944468
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -796,6 +803,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   onSideEmptied:
+    m_PersistentCalls:
+      m_Calls: []
+  onFullSignaled:
     m_PersistentCalls:
       m_Calls: []
 --- !u!65 &3288833492358862710
@@ -833,8 +843,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrashCanAutoUnloadController
   fillSensor: {fileID: 0}
   holdDuration: 5
-  unloadLeftSide: 1
-  unloadRightSide: 1
+  watchLeftSide: 1
+  watchRightSide: 1
 --- !u!1 &6902052580384518803
 GameObject:
   m_ObjectHideFlags: 0

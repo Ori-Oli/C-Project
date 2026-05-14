@@ -10,4 +10,5 @@ public class TrashItemMarker : MonoBehaviour
 	}
 
 	public SpawnSide spawnSide = SpawnSide.Unknown;
+	public TrashCanFillSensor ownerSensor;
 }
