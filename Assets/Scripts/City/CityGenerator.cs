@@ -94,7 +94,7 @@ public class CityGenerator : MonoBehaviour
     [Header("Generation Settings")]
     public bool useMapFile = true;
     public TextAsset mapTextAsset;
-    public string mapFilePath = "Assets/Scripts/50x50.map";
+    public string mapFilePath = "Assets/Scripts/Maps/50x50.map";
     public bool syncGridSizeToMap = true;
     public bool mapFirstLineIsTop = true;
     public bool populateBuildingsOnMapEmptyCells = false;
