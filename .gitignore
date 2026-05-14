@@ -40,6 +40,11 @@ ExportedObj/
 # ========== Auto Generated ==========
 sysinfo.txt
 
+# ========== Local Environment ==========
+.env
+.env.*
+!.env.example
+
 # ========== Addressables ==========
 /ServerData
 
