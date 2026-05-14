@@ -56,7 +56,7 @@ MonoBehaviour:
   trashCanPrefab: {fileID: 6265023572636278062, guid: aab43fd86dd4043f4bfe0f4e06d81239, type: 3}
   useMapFile: 1
   mapTextAsset: {fileID: 0}
-  mapFilePath: Assets/Scripts/50x50.map
+  mapFilePath: Assets/Scripts/Maps/50x50.map
   syncGridSizeToMap: 1
   mapFirstLineIsTop: 1
   populateBuildingsOnMapEmptyCells: 0
