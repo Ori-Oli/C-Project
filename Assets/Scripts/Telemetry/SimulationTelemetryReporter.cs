@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class SimulationTelemetryReporter : MonoBehaviour
 {
+    private const string RuntimeTelemetryObjectName = "SupabaseTelemetry";
+
     [Header("References")]
     public SupabaseTelemetryUploader uploader;
 
@@ -24,6 +26,26 @@ public class SimulationTelemetryReporter : MonoBehaviour
     private readonly List<TrashBinTelemetryPayload> trashBinBuffer = new List<TrashBinTelemetryPayload>();
     private readonly List<TrashTruckTelemetryPayload> trashTruckBuffer = new List<TrashTruckTelemetryPayload>();
     private Coroutine uploadRoutine;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    private static void EnsureRuntimeTelemetryReporter()
+    {
+        if (FindAnyObjectByType<SimulationTelemetryReporter>() != null)
+        {
+            return;
+        }
+
+        GameObject telemetryObject = new GameObject(RuntimeTelemetryObjectName);
+        telemetryObject.SetActive(false);
+
+        SupabaseTelemetryUploader runtimeUploader = telemetryObject.AddComponent<SupabaseTelemetryUploader>();
+        runtimeUploader.logSuccessfulUploads = true;
+        SimulationTelemetryReporter runtimeReporter = telemetryObject.AddComponent<SimulationTelemetryReporter>();
+        runtimeReporter.uploader = runtimeUploader;
+        runtimeReporter.autoFindUploader = false;
+
+        telemetryObject.SetActive(true);
+    }
 
     private void Awake()
     {
@@ -84,8 +106,7 @@ public class SimulationTelemetryReporter : MonoBehaviour
         if (uploadTrashBins)
         {
             TrashCanStatus[] trashCans = FindObjectsByType<TrashCanStatus>(
-                includeInactiveObjects ? FindObjectsInactive.Include : FindObjectsInactive.Exclude,
-                FindObjectsSortMode.None);
+                includeInactiveObjects ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
 
             for (int i = 0; i < trashCans.Length; i++)
             {
@@ -104,8 +125,7 @@ public class SimulationTelemetryReporter : MonoBehaviour
         if (uploadGarbageTrucks)
         {
             GarbageTruckController[] trucks = FindObjectsByType<GarbageTruckController>(
-                includeInactiveObjects ? FindObjectsInactive.Include : FindObjectsInactive.Exclude,
-                FindObjectsSortMode.None);
+                includeInactiveObjects ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
 
             for (int i = 0; i < trucks.Length; i++)
             {
