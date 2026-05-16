@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Debug = ProjectSilentDebug;
 
 public class TrashCanStatus : MonoBehaviour
 {

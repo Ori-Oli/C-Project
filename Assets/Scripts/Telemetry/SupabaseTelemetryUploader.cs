@@ -27,8 +27,8 @@ public class SupabaseTelemetryUploader : MonoBehaviour
     [Header("Request")]
     [Min(1)] public int requestTimeoutSeconds = 10;
     public bool dropUploadWhenBusy = true;
-    public bool logSuccessfulUploads = false;
-    public bool logUploadErrors = true;
+    public bool logSuccessfulUploads = true;
+    public bool logUploadErrors = false;
 
     public bool IsUploading { get; private set; }
 
