@@ -1,4 +1,5 @@
 using UnityEngine;
+using Debug = ProjectSilentDebug;
 
 public class TrashCanAutoUnloadController : MonoBehaviour
 {
@@ -83,6 +84,11 @@ public class TrashCanAutoUnloadController : MonoBehaviour
         }
 
         if (currentTimer < holdDuration)
+        {
+            return;
+        }
+
+        if (fillSensor.FillRatio < fillSensor.FullSignalRatio)
         {
             return;
         }

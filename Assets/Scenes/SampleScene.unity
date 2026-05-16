@@ -545,6 +545,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: CityGenerator
       objectReference: {fileID: 0}
+    - target: {fileID: 5267274562285421509, guid: 43784ea861630450cbdebb91f6c6bc36, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -561,6 +565,10 @@ PrefabInstance:
     - target: {fileID: 7052239961355522989, guid: 97537b3e6d4da48d19a9e6934248f964, type: 3}
       propertyPath: m_Name
       value: Trash Collection Test Signal
+      objectReference: {fileID: 0}
+    - target: {fileID: 7052239961355522989, guid: 97537b3e6d4da48d19a9e6934248f964, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8869581057972846065, guid: 97537b3e6d4da48d19a9e6934248f964, type: 3}
       propertyPath: m_LocalPosition.x
@@ -618,6 +626,10 @@ PrefabInstance:
     - target: {fileID: 2327028060013015472, guid: 256e6b9513e484de790c48124f7ffc1f, type: 3}
       propertyPath: m_Name
       value: TrashCollectionDispatcher
+      objectReference: {fileID: 0}
+    - target: {fileID: 2327028060013015472, guid: 256e6b9513e484de790c48124f7ffc1f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8669467674385140587, guid: 256e6b9513e484de790c48124f7ffc1f, type: 3}
       propertyPath: m_LocalPosition.x

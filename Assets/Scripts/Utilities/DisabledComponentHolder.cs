@@ -18,3 +18,30 @@ public class DisabledComponentHolder : MonoBehaviour
         Destroy(this);
     }
 }
+
+public static class ProjectSilentDebug
+{
+    public static void Log(object message)
+    {
+    }
+
+    public static void Log(object message, Object context)
+    {
+    }
+
+    public static void LogWarning(object message)
+    {
+    }
+
+    public static void LogWarning(object message, Object context)
+    {
+    }
+
+    public static void LogError(object message)
+    {
+    }
+
+    public static void LogError(object message, Object context)
+    {
+    }
+}

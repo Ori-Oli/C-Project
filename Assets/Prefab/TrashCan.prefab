@@ -739,7 +739,7 @@ MonoBehaviour:
   enableSpawnProfiling: 1
   profilingWindow: 100
   trashCanFillSensor: {fileID: 0}
-  stopSpawnFillRatio: 0.8
+  stopSpawnFillRatio: 0.9
   spawnInterval: 0.1
   spawnRandomRange: 0.5
   positionOffsetX: 0
@@ -792,7 +792,14 @@ MonoBehaviour:
     m_Bits: 4294967295
   requireTrashItemMarker: 1
   ignoreTriggerColliders: 1
-  fullHeightRatio: 1
+  fullHeightRatio: 0.9
+  autoCreateLevelSensors: 1
+  levelSensorPercents:
+  - 30
+  - 50
+  - 70
+  levelSensorThickness: 0.05
+  fullTelemetryLevel: 90
   onFillRatioChanged:
     m_PersistentCalls:
       m_Calls: []

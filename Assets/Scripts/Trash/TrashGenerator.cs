@@ -1,4 +1,5 @@
 using UnityEngine;
+using Debug = ProjectSilentDebug;
 
 public class TrashGenerator : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class TrashGenerator : MonoBehaviour
 
     [Header("쓰레기통 연동")]
     public TrashCanFillSensor trashCanFillSensor;
-    [Range(0f, 1f)] public float stopSpawnFillRatio = 0.8f;
+    [Range(0f, 1f)] public float stopSpawnFillRatio = 0.9f;
     
     [Header("생성 설정")]
     public float spawnInterval = 0.5f; // 생성 간격 (초)
@@ -97,12 +98,6 @@ public class TrashGenerator : MonoBehaviour
             return true;
         }
 
-        // 가득 차면 생성 중단
-        if (trashCanFillSensor.IsFull)
-        {
-            return false;
-        }
-
         return CanSpawnOnLeftSide() || CanSpawnOnRightSide();
     }
 
@@ -113,7 +108,7 @@ public class TrashGenerator : MonoBehaviour
             return true;
         }
 
-        return trashCanFillSensor.LeftFillRatio < stopSpawnFillRatio;
+        return trashCanFillSensor.LeftFillRatio < GetSpawnStopRatio();
     }
 
     bool CanSpawnOnRightSide()
@@ -123,7 +118,17 @@ public class TrashGenerator : MonoBehaviour
             return true;
         }
 
-        return trashCanFillSensor.RightFillRatio < stopSpawnFillRatio;
+        return trashCanFillSensor.RightFillRatio < GetSpawnStopRatio();
+    }
+
+    float GetSpawnStopRatio()
+    {
+        if (trashCanFillSensor == null)
+        {
+            return stopSpawnFillRatio;
+        }
+
+        return Mathf.Max(stopSpawnFillRatio, trashCanFillSensor.FullSignalRatio);
     }
     
     System.Collections.IEnumerator SpawnTrashCoroutine()

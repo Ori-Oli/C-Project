@@ -9,6 +9,7 @@ public class TrashBinTelemetryPayload
     public float y;
     public float z;
     public bool is_full;
+    public int fill_level;
     public string updated_at;
 }
 
@@ -35,9 +36,13 @@ public static class SupabaseTelemetryPayloadFactory
             return null;
         }
 
-        TrashCanFillSensor fillSensor = trashCan.GetComponent<TrashCanFillSensor>();
+        TrashCanFillSensor fillSensor = trashCan.fillSensor != null
+            ? trashCan.fillSensor
+            : trashCan.GetComponentInChildren<TrashCanFillSensor>();
         Vector3 position = trashCan.transform.position;
-        bool isFull = trashCan.IsFull || (fillSensor != null && fillSensor.IsFull);
+        int fillLevel = fillSensor != null ? fillSensor.TelemetryFillLevel : 0;
+        bool isFull = trashCan.IsFull
+            || (fillSensor != null && (fillSensor.IsFull || fillLevel >= fillSensor.fullTelemetryLevel));
 
         return new TrashBinTelemetryPayload
         {
@@ -47,6 +52,7 @@ public static class SupabaseTelemetryPayloadFactory
             y = position.y,
             z = position.z,
             is_full = isFull,
+            fill_level = fillLevel,
             updated_at = timestampUtc
         };
     }
