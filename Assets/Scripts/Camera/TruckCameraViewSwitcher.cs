@@ -109,6 +109,7 @@ public class TruckCameraViewSwitcher : MonoBehaviour
 
     public void ShowOverview()
     {
+        CancelTrashCanNavigation();
         selectedTruck = null;
         followVelocity = Vector3.zero;
 
@@ -127,6 +128,7 @@ public class TruckCameraViewSwitcher : MonoBehaviour
 
     public void ShowTruck(int truckIndex)
     {
+        CancelTrashCanNavigation();
         RefreshTrucks();
 
         if (truckIndex < 0 || truckIndex >= trucks.Count || trucks[truckIndex] == null)
@@ -135,6 +137,13 @@ public class TruckCameraViewSwitcher : MonoBehaviour
         }
 
         selectedTruck = trucks[truckIndex];
+        followVelocity = Vector3.zero;
+        UpdateButtonStates();
+    }
+
+    public void ReleaseCameraControl()
+    {
+        selectedTruck = null;
         followVelocity = Vector3.zero;
         UpdateButtonStates();
     }
@@ -381,6 +390,15 @@ public class TruckCameraViewSwitcher : MonoBehaviour
         if (image != null)
         {
             image.color = selected ? selectedButtonColor : normalButtonColor;
+        }
+    }
+
+    private void CancelTrashCanNavigation()
+    {
+        TrashCanCameraNavigator navigator = FindAnyObjectByType<TrashCanCameraNavigator>();
+        if (navigator != null)
+        {
+            navigator.CancelNavigation();
         }
     }
 
