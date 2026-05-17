@@ -26,6 +26,8 @@ public class SimulationTelemetryReporter : MonoBehaviour
 
     private readonly List<TrashBinTelemetryPayload> trashBinBuffer = new List<TrashBinTelemetryPayload>();
     private readonly List<TrashTruckTelemetryPayload> trashTruckBuffer = new List<TrashTruckTelemetryPayload>();
+    private readonly List<TrashCanStatus> trashCanSortBuffer = new List<TrashCanStatus>();
+    private readonly Dictionary<TrashCanStatus, string> trashBinNames = new Dictionary<TrashCanStatus, string>();
     private Coroutine uploadRoutine;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -103,17 +105,24 @@ public class SimulationTelemetryReporter : MonoBehaviour
         string timestampUtc = DateTime.UtcNow.ToString("o");
         trashBinBuffer.Clear();
         trashTruckBuffer.Clear();
+        trashBinNames.Clear();
+
+        TrashCanStatus[] trashCans = null;
+        if (uploadTrashBins || uploadGarbageTrucks)
+        {
+            trashCans = FindObjectsByType<TrashCanStatus>(
+                includeInactiveObjects ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
+            BuildTrashBinNameMap(trashCans);
+        }
 
         if (uploadTrashBins)
         {
-            TrashCanStatus[] trashCans = FindObjectsByType<TrashCanStatus>(
-                includeInactiveObjects ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
-
             for (int i = 0; i < trashCans.Length; i++)
             {
                 TrashBinTelemetryPayload payload = SupabaseTelemetryPayloadFactory.CreateBinPayload(
                     simulationId,
                     trashCans[i],
+                    GetTrashBinName(trashCans[i]),
                     timestampUtc);
 
                 if (payload != null)
@@ -133,6 +142,7 @@ public class SimulationTelemetryReporter : MonoBehaviour
                 TrashTruckTelemetryPayload payload = SupabaseTelemetryPayloadFactory.CreateTruckPayload(
                     simulationId,
                     trucks[i],
+                    GetDestinationName(trucks[i]),
                     timestampUtc);
 
                 if (payload != null)
@@ -141,5 +151,67 @@ public class SimulationTelemetryReporter : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void BuildTrashBinNameMap(TrashCanStatus[] trashCans)
+    {
+        trashCanSortBuffer.Clear();
+
+        if (trashCans == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < trashCans.Length; i++)
+        {
+            if (trashCans[i] != null)
+            {
+                trashCanSortBuffer.Add(trashCans[i]);
+            }
+        }
+
+        trashCanSortBuffer.Sort(CompareTrashCansByGrid);
+
+        for (int i = 0; i < trashCanSortBuffer.Count; i++)
+        {
+            trashBinNames[trashCanSortBuffer[i]] = $"trashbin_{i + 1}";
+        }
+    }
+
+    private static int CompareTrashCansByGrid(TrashCanStatus left, TrashCanStatus right)
+    {
+        int xCompare = left.gridPosition.x.CompareTo(right.gridPosition.x);
+        if (xCompare != 0)
+        {
+            return xCompare;
+        }
+
+        int yCompare = left.gridPosition.y.CompareTo(right.gridPosition.y);
+        if (yCompare != 0)
+        {
+            return yCompare;
+        }
+
+        return string.CompareOrdinal(left.name, right.name);
+    }
+
+    private string GetTrashBinName(TrashCanStatus trashCan)
+    {
+        if (trashCan != null && trashBinNames.TryGetValue(trashCan, out string binName))
+        {
+            return binName;
+        }
+
+        return string.Empty;
+    }
+
+    private string GetDestinationName(GarbageTruckController truck)
+    {
+        if (truck == null)
+        {
+            return string.Empty;
+        }
+
+        return GetTrashBinName(truck.AssignedTrashCan);
     }
 }
