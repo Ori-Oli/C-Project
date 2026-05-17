@@ -47,6 +47,7 @@ public static class SupabaseTelemetryJson
         builder.Append('{');
         AppendString(builder, "simulation_id", payload.simulation_id);
         AppendString(builder, "bin_id", payload.bin_id, true);
+        AppendString(builder, "bin_name", payload.bin_name, true);
         AppendFloat(builder, "x", payload.x, true);
         AppendFloat(builder, "y", payload.y, true);
         AppendFloat(builder, "z", payload.z, true);
@@ -67,6 +68,7 @@ public static class SupabaseTelemetryJson
         AppendInt(builder, "collected_count", payload.collected_count, true);
         AppendInt(builder, "max_load", payload.max_load, true);
         AppendString(builder, "status", payload.status, true);
+        AppendString(builder, "destination", payload.destination, true);
         AppendString(builder, "updated_at", payload.updated_at, true);
         builder.Append('}');
     }

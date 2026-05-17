@@ -5,6 +5,7 @@ public class TrashBinTelemetryPayload
 {
     public string simulation_id;
     public string bin_id;
+    public string bin_name;
     public float x;
     public float y;
     public float z;
@@ -24,12 +25,17 @@ public class TrashTruckTelemetryPayload
     public int collected_count;
     public int max_load;
     public string status;
+    public string destination;
     public string updated_at;
 }
 
 public static class SupabaseTelemetryPayloadFactory
 {
-    public static TrashBinTelemetryPayload CreateBinPayload(string simulationId, TrashCanStatus trashCan, string timestampUtc)
+    public static TrashBinTelemetryPayload CreateBinPayload(
+        string simulationId,
+        TrashCanStatus trashCan,
+        string binName,
+        string timestampUtc)
     {
         if (trashCan == null)
         {
@@ -48,6 +54,7 @@ public static class SupabaseTelemetryPayloadFactory
         {
             simulation_id = simulationId,
             bin_id = CreateTrashBinId(trashCan),
+            bin_name = binName,
             x = position.x,
             y = position.y,
             z = position.z,
@@ -57,7 +64,11 @@ public static class SupabaseTelemetryPayloadFactory
         };
     }
 
-    public static TrashTruckTelemetryPayload CreateTruckPayload(string simulationId, GarbageTruckController truck, string timestampUtc)
+    public static TrashTruckTelemetryPayload CreateTruckPayload(
+        string simulationId,
+        GarbageTruckController truck,
+        string destination,
+        string timestampUtc)
     {
         if (truck == null)
         {
@@ -76,6 +87,7 @@ public static class SupabaseTelemetryPayloadFactory
             collected_count = truck.currentLoad,
             max_load = truck.maxLoad,
             status = ToTelemetryStatus(truck.State),
+            destination = destination,
             updated_at = timestampUtc
         };
     }

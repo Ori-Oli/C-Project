@@ -29,6 +29,7 @@
 
 - `simulation_id`
 - `bin_id`
+- `bin_name`
 - `x`, `y`, `z`
 - `is_full`
 - `updated_at`
@@ -41,11 +42,13 @@
 - `collected_count`
 - `max_load`
 - `status`
+- `destination`
 - `updated_at`
 
 ## Notes
 
 - `simulation_id`는 실행마다 자동 생성된다.
 - 쓰레기통 ID는 grid position이 있으면 `bin_x_y` 형식으로 생성된다.
+- 쓰레기통 표시 이름은 grid x, y 오름차순으로 `trashbin_1`부터 생성된다.
 - 수거차 ID는 GameObject 이름을 기반으로 생성된다.
 - REST upsert 기준 conflict key는 각각 `(simulation_id, bin_id)`, `(simulation_id, truck_id)`다.

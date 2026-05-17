@@ -1,6 +1,7 @@
 create table if not exists trash_bin_state_latest (
   simulation_id text not null,
   bin_id text not null,
+  bin_name text not null default '',
   x double precision not null,
   y double precision not null,
   z double precision not null,
@@ -18,6 +19,7 @@ create table if not exists trash_truck_state_latest (
   collected_count integer not null default 0,
   max_load integer not null default 0,
   status text not null check (status in ('idle', 'collecting', 'returning')),
+  destination text not null default '',
   updated_at timestamptz not null default now(),
   primary key (simulation_id, truck_id)
 );

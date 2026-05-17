@@ -33,6 +33,7 @@ public class GarbageTruckController : MonoBehaviour
     public GarbageTruckState State { get; private set; } = GarbageTruckState.Idle;
     public bool IsIdle => State == GarbageTruckState.Idle;
     public Vector2Int CurrentGridPosition => currentGridPosition;
+    public TrashCanStatus AssignedTrashCan => assignedTrashCan;
 
     private CityGenerator cityGenerator;
     private TrashCollectionDispatcher dispatcher;
@@ -101,6 +102,7 @@ public class GarbageTruckController : MonoBehaviour
 
     public void UnloadAtDepot()
     {
+        assignedTrashCan = null;
         currentLoad = 0;
         State = GarbageTruckState.Idle;
     }
@@ -176,6 +178,7 @@ public class GarbageTruckController : MonoBehaviour
             Debug.Log($"[GarbageTruckController] 쓰레기통 회수 완료! 현재 로드: {currentLoad}/{maxLoad}", gameObject);
         }
 
+        assignedTrashCan = null;
         State = GarbageTruckState.Idle;
         activeRoutine = null;
         dispatcher?.NotifyTruckFinishedCollection(this, trashCan, currentLoad >= maxLoad);
