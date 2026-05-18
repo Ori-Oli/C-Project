@@ -101,7 +101,7 @@ public class TrashCanCameraNavigator : MonoBehaviour
     {
         if (string.IsNullOrWhiteSpace(rawNumber))
         {
-            SetStatus("번호를 입력하세요.");
+            SetStatus("Enter a number.");
             return;
         }
 
@@ -150,13 +150,13 @@ public class TrashCanCameraNavigator : MonoBehaviour
     {
         yield return null;
         RefreshTrashCans();
-        SetStatus(sortedTrashCans.Count > 0 ? $"1-{sortedTrashCans.Count}" : "쓰레기통 없음");
+        SetStatus(sortedTrashCans.Count > 0 ? $"1-{sortedTrashCans.Count}" : "No trash cans");
     }
 
     private void HandleCityGenerated()
     {
         RefreshTrashCans();
-        SetStatus(sortedTrashCans.Count > 0 ? $"1-{sortedTrashCans.Count}" : "쓰레기통 없음");
+        SetStatus(sortedTrashCans.Count > 0 ? $"1-{sortedTrashCans.Count}" : "No trash cans");
     }
 
     private bool TrySelectTrashCan(string input, out TrashCanStatus trashCan, out string failureMessage)
@@ -166,7 +166,7 @@ public class TrashCanCameraNavigator : MonoBehaviour
 
         if (sortedTrashCans.Count == 0)
         {
-            failureMessage = "쓰레기통 없음";
+            failureMessage = "No trash cans";
             return false;
         }
 
@@ -182,20 +182,20 @@ public class TrashCanCameraNavigator : MonoBehaviour
                 }
             }
 
-            failureMessage = $"좌표 없음: {gridPosition.x},{gridPosition.y}";
+            failureMessage = $"No trash can at: {gridPosition.x},{gridPosition.y}";
             return false;
         }
 
         if (!int.TryParse(input, out int number))
         {
-            failureMessage = "숫자만 입력하세요.";
+            failureMessage = "Enter numbers only.";
             return false;
         }
 
         int index = number - 1;
         if (index < 0 || index >= sortedTrashCans.Count)
         {
-            failureMessage = $"범위: 1-{sortedTrashCans.Count}";
+            failureMessage = $"Range: 1-{sortedTrashCans.Count}";
             return false;
         }
 
@@ -377,7 +377,7 @@ public class TrashCanCameraNavigator : MonoBehaviour
         Canvas canvas = CreateCanvas();
         RectTransform panel = CreatePanel(canvas.transform);
         trashCanInput = CreateInputField(panel);
-        Button moveButton = CreateButton(panel, "이동");
+        Button moveButton = CreateButton(panel, "Go");
         statusLabel = CreateStatusLabel(panel);
 
         trashCanInput.onEndEdit.AddListener(HandleInputSubmitted);
@@ -451,7 +451,7 @@ public class TrashCanCameraNavigator : MonoBehaviour
         text.rectTransform.offsetMax = new Vector2(-10f, 0f);
         input.textComponent = text;
 
-        Text placeholder = CreateText(inputObject.transform, "Placeholder", "번호", TextAnchor.MiddleLeft, new Color(0.35f, 0.35f, 0.35f, 0.75f));
+        Text placeholder = CreateText(inputObject.transform, "Placeholder", "No.", TextAnchor.MiddleLeft, new Color(0.35f, 0.35f, 0.35f, 0.75f));
         placeholder.fontStyle = FontStyle.Italic;
         placeholder.rectTransform.offsetMin = new Vector2(10f, 0f);
         placeholder.rectTransform.offsetMax = new Vector2(-10f, 0f);

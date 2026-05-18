@@ -96,6 +96,7 @@ public class CityGenerator : MonoBehaviour
     public bool useMapFile = true;
     public TextAsset mapTextAsset;
     public string mapFilePath = "Assets/Scripts/Maps/50x50.map";
+    public string resourcesMapPath = "Maps/50x50";
     public bool syncGridSizeToMap = true;
     public bool mapFirstLineIsTop = true;
     public bool populateBuildingsOnMapEmptyCells = false;
@@ -314,6 +315,11 @@ public class CityGenerator : MonoBehaviour
         {
             ReadMapLinesFromText(mapTextAsset.text, mapLines);
         }
+        else if (TryLoadResourcesMap(out TextAsset resourcesMap))
+        {
+            ReadMapLinesFromText(resourcesMap.text, mapLines);
+        }
+#if !UNITY_WEBGL
         else if (!string.IsNullOrWhiteSpace(mapFilePath))
         {
             string fullPath = Path.IsPathRooted(mapFilePath)
@@ -328,14 +334,27 @@ public class CityGenerator : MonoBehaviour
 
             ReadMapLinesFromText(File.ReadAllText(fullPath), mapLines);
         }
+#endif
 
         if (mapLines.Count == 0)
         {
-            Debug.LogWarning("Map file is empty or not assigned. Falling back to procedural generation.");
+            Debug.LogWarning("Map TextAsset is empty or not assigned. Falling back to procedural generation.");
             return false;
         }
 
         return true;
+    }
+
+    private bool TryLoadResourcesMap(out TextAsset resourcesMap)
+    {
+        resourcesMap = null;
+        if (string.IsNullOrWhiteSpace(resourcesMapPath))
+        {
+            return false;
+        }
+
+        resourcesMap = Resources.Load<TextAsset>(resourcesMapPath);
+        return resourcesMap != null && !string.IsNullOrWhiteSpace(resourcesMap.text);
     }
 
     private void ReadMapLinesFromText(string text, List<string> mapLines)
@@ -439,6 +458,11 @@ public class CityGenerator : MonoBehaviour
         if (mapTextAsset != null)
         {
             return mapTextAsset.name;
+        }
+
+        if (!string.IsNullOrWhiteSpace(resourcesMapPath))
+        {
+            return $"Resources/{resourcesMapPath}";
         }
 
         return string.IsNullOrWhiteSpace(mapFilePath) ? "None" : mapFilePath;

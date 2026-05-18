@@ -222,7 +222,7 @@ public class TruckCameraViewSwitcher : MonoBehaviour
         Canvas canvas = CreateCanvas();
         RectTransform panel = CreatePanel(canvas.transform);
 
-        overviewButton = CreateButton(panel, "전체", 0);
+        overviewButton = CreateButton(panel, "Overview", 0);
         overviewButton.onClick.AddListener(ShowOverview);
 
         truckButtons = new Button[maxTruckButtons];
@@ -230,7 +230,7 @@ public class TruckCameraViewSwitcher : MonoBehaviour
         for (int i = 0; i < maxTruckButtons; i++)
         {
             int truckIndex = i;
-            Button button = CreateButton(panel, $"트럭 {i + 1}", i + 1);
+            Button button = CreateButton(panel, $"Truck {i + 1}", i + 1);
             button.onClick.AddListener(() => ShowTruck(truckIndex));
             truckButtons[i] = button;
             truckButtonLabels[i] = button.GetComponentInChildren<Text>();
@@ -372,7 +372,7 @@ public class TruckCameraViewSwitcher : MonoBehaviour
 
             if (truckButtonLabels != null && i < truckButtonLabels.Length && truckButtonLabels[i] != null)
             {
-                truckButtonLabels[i].text = $"트럭 {i + 1}";
+                truckButtonLabels[i].text = $"Truck {i + 1}";
             }
 
             SetButtonSelected(truckButtons[i], hasTruck && selectedTruck == trucks[i]);
